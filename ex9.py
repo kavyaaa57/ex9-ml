@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from sklearn.neighbors import LocalOutlierFactor
 import streamlit as st
 
 def lowess(x, y, f=2./3., iter=3):
@@ -21,6 +20,19 @@ def lowess(x, y, f=2./3., iter=3):
             yest[i] = beta[0] + beta[1] * x[i]
     return yest
 
+@st.cache_data
+def load_sample_data():
+    sample_data = '''
+    x,y
+    1,2
+    2,4
+    3,6
+    4,8
+    5,10
+    '''
+    from io import StringIO
+    return pd.read_csv(StringIO(sample_data))
+
 def main():
     st.title("Non-Parametric Locally Weighted Regression (LOWESS)")
 
@@ -28,26 +40,30 @@ def main():
     uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
     if uploaded_file is not None:
         data = pd.read_csv(uploaded_file)
-        st.write(data.head())
+    else:
+        st.write("Using sample data.")
+        data = load_sample_data()
 
-        # Select columns for X and y
-        columns = data.columns.tolist()
-        x_col = st.selectbox("Select column for X", columns)
-        y_col = st.selectbox("Select column for y", columns, index=1)
+    st.write(data.head())
 
-        # Fit LOWESS
-        x = data[x_col].values
-        y = data[y_col].values
-        y_lowess = lowess(x, y)
+    # Select columns for X and y
+    columns = data.columns.tolist()
+    x_col = st.selectbox("Select column for X", columns)
+    y_col = st.selectbox("Select column for y", columns, index=1)
 
-        # Plot data and LOWESS curve
-        fig, ax = plt.subplots()
-        ax.scatter(x, y, label="Data")
-        ax.plot(x, y_lowess, 'r', label="LOWESS")
-        ax.set_xlabel(x_col)
-        ax.set_ylabel(y_col)
-        ax.legend()
-        st.pyplot(fig)
+    # Fit LOWESS
+    x = data[x_col].values
+    y = data[y_col].values
+    y_lowess = lowess(x, y)
+
+    # Plot data and LOWESS curve
+    fig, ax = plt.subplots()
+    ax.scatter(x, y, label="Data")
+    ax.plot(x, y_lowess, 'r', label="LOWESS")
+    ax.set_xlabel(x_col)
+    ax.set_ylabel(y_col)
+    ax.legend()
+    st.pyplot(fig)
 
 if __name__ == "__main__":
     main()

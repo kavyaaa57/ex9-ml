@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import streamlit as st
-
+st.markdown("<h1 style='text-align: center;'>Code X</h1>", unsafe_allow_html=True)
 def lowess(x, y, f=2./3., iter=3):
     n = len(x)
     r = int(np.ceil(f * n))
